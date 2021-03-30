@@ -31,8 +31,7 @@ class ProjectsViewSet(viewsets.ViewSet):
             return Response(data={'error': 'unauthorized'})
 
     def create(self, request):
-        """Create a project"""
-        data = request.query_params.dict()
+        data = request.data.dict()
         data['contributors'] = [request.user.pk]
         data['author_user_id'] = request.user.pk
         serializer_data = ProjectsSerializer(data=data)
@@ -44,9 +43,7 @@ class ProjectsViewSet(viewsets.ViewSet):
         """Update a project"""
         project = get_object_or_404(self.queryset, pk=pk)
         if request.user.pk == project.author_user_id.pk:
-            data = request.query_params.dict()
-            data['author_user_id'] = request.user.pk
-            serializer = ProjectsSerializer(project, data=data)
+            serializer = ProjectsSerializer(project, data=request.data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)
@@ -135,7 +132,7 @@ class IssuesProjectsViewSet(viewsets.ViewSet):
         issue=self.issue(pk)
         if request.user == issue.author_user_id:
             data = request.query_params.dict()
-            serializer = IssuesSerializer(issue)
+            serializer = IssuesSerializer(issue, data=data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)
