@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticate
 from .models import Projects, Issues, Comments
 from .permission import IsAuthorOrReadOnly
 from .serializers import ProjectsSerializer, UsersProjectSerializer, IssuesSerializer, CommentsSerializer
-from quickstart.models import CustomUser
+from authentification.models import CustomUser
 
 
 class ProjectsViewSet(viewsets.ViewSet):

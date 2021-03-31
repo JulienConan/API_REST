@@ -38,8 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'quickstart',
     'rest_framework',
+    'authentification',
     'api',
 ]
 
@@ -53,7 +53,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'tutorial.urls'
+ROOT_URLCONF = 'softdesk.urls'
 
 TEMPLATES = [
     {
@@ -71,7 +71,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'tutorial.wsgi.application'
+WSGI_APPLICATION = 'softdesk.wsgi.application'
 
 
 # Database
@@ -103,10 +103,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTH_USER_MODEL = 'quickstart.CustomUser'
+AUTH_USER_MODEL = 'authentification.CustomUser'
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=300),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
 
