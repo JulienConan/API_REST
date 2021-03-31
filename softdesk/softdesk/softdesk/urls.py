@@ -7,7 +7,6 @@ from rest_framework_simplejwt.views import (
 from rest_framework.routers import DefaultRouter
 from rest_framework_nested import routers
 
-
 from authentification.views import RegisterView
 from api.views import ProjectsViewSet, UserProjectsViewSet, IssuesProjectsViewSet, CommentsIssuesViewSet
 
