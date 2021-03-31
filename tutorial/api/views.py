@@ -4,13 +4,14 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
 
 from .models import Projects, Issues, Comments
+from .permission import IsAuthorOrReadOnly
 from .serializers import ProjectsSerializer, UsersProjectSerializer, IssuesSerializer, CommentsSerializer
 from quickstart.models import CustomUser
 
 
 class ProjectsViewSet(viewsets.ViewSet):
     """API Projects actions"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
     queryset = Projects.objects.all()
 
     def list(self, request):
@@ -53,12 +54,9 @@ class ProjectsViewSet(viewsets.ViewSet):
     def delete(self,request,pk=None):
         """Delete a project"""
         project = get_object_or_404(self.queryset, pk=pk)
-        if request.user.pk == project.author_user_id.pk:
-            project.delete()
-            return Response(status=204, data={'mesage' : 'bien effacé'})
-        else:
-            return Response(data={'error': 'unauthorized'})
-
+        project.delete()
+        return Response(status=204, data={'mesage' : 'bien effacé'})
+    
 class UserProjectsViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
 
@@ -148,6 +146,10 @@ class IssuesProjectsViewSet(viewsets.ViewSet):
 
 class CommentsIssuesViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
+
+    def issue(self, pk):
+        return Issues.objects.get()
+
 
     def list(self, request, projects_pk, issues_pk):
         queryset = Comments.objects.filter(issue_id=issues_pk)
