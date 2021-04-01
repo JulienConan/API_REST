@@ -77,7 +77,6 @@ class UserProjectsViewSet(viewsets.ViewSet):
 
     def destroy(self, request, projects_pk=None, pk=None):
         project = self.project(projects_pk)
-        print(project)
         project.contributors.remove(pk)
         serializer = ProjectsSerializer(project)
         return Response(serializer.data)
