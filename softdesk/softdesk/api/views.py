@@ -1,21 +1,23 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
 from .models import Projects, Issues, Comments
-from .permissions import ProjectPermissions
+from .permissions import (
+                          ProjectPermissions,
+                          UserPermissions
+                          )
 from .serializers import(
                         ProjectsSerializer,
                         UsersProjectSerializer,
                         IssuesSerializer,
                         CommentsSerializer
                         )
-from authentification.models import CustomUser
-
 
 class ProjectsViewSet(viewsets.ViewSet):
     """API Projects actions"""
-    permission_classes = [ProjectPermissions]
+    permission_classes = [IsAuthenticated, ProjectPermissions]
 
     def list(self, request):
         """Project's user list"""
@@ -26,7 +28,6 @@ class ProjectsViewSet(viewsets.ViewSet):
     def retrieve(self, request, pk=None):
         """one particulary project"""
         project = get_object_or_404(Projects, pk=pk)
-        contributors = [user for user in project.contributors.all()]
         serializer = ProjectsSerializer(project)
         return Response(serializer.data)
 
@@ -49,12 +50,13 @@ class ProjectsViewSet(viewsets.ViewSet):
 
     def delete(self, request, pk=None):
         """Delete a project"""
-        queryset = get_object_or_404(Projects, pk=pk)
-        queryset.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT, data={'mesage': 'bien effacé'})
+        project = get_object_or_404(Projects, pk=pk)
+        project.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT, data={'message': 'bien effacé'})
 
 
 class UserProjectsViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated, UserPermissions]
 
     def project(self, pk):
         project = get_object_or_404(Projects, pk=pk)
@@ -62,29 +64,27 @@ class UserProjectsViewSet(viewsets.ViewSet):
 
     def list(self, request, projects_pk=None):
         project = self.project(projects_pk)
-        if request.user.pk in project.contributors.all():
-            serializer = UsersProjectSerializer(project)
-            return Response(serializer.data)
-        else:
+        if request.user not in project.contributors.all():
             return Response(data={'error': 'unauthorized'})
+        serializer = UsersProjectSerializer(project)
+        return Response(serializer.data)
 
     def create(self, request, projects_pk=None):
         project = self.project(projects_pk)
-        project.contributors.add(int(request.query_params['contributors']))
+        project.contributors.add(int(request.data.dict()['contributors']))
         serializer = ProjectsSerializer(project)
         return Response(serializer.data)
 
-    def delete(self, request, projects_pk=None, pk=None):
+    def destroy(self, request, projects_pk=None, pk=None):
         project = self.project(projects_pk)
-        if request.user == project.author_user_id:
-            project.contributors.remove(pk)
-            serializer = ProjectsSerializer(project)
-            return Response(serializer.data)
-        else:
-            return Response(data={'error': 'unauthorized'})
+        print(project)
+        project.contributors.remove(pk)
+        serializer = ProjectsSerializer(project)
+        return Response(serializer.data)
 
 
 class IssuesProjectsViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated]
 
     def project(self, pk):
         return Projects.objects.get(pk=pk)
