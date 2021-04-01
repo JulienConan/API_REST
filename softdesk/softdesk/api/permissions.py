@@ -4,7 +4,7 @@ from .models import Projects, Issues, Comments
 
 
 class ProjectPermissions(permissions.BasePermission):
-
+    """ Permissions for Project """
     def has_permission(self, request, view):
         return request.user.is_authenticated
 
@@ -17,52 +17,28 @@ class ProjectPermissions(permissions.BasePermission):
             return False
 
 class UserPermissions(permissions.BasePermission):
-
-    def has_permission(self, request, view):
-        project = get_object_or_404(Projects, pk=view.kwargs['projects_pk'])
-
-        if request.method == 'GET':
-            return request.user in project.contributors.all()
-        if request.method in ['POST', 'DELETE']:
-            return request.user == project.author
-
-
-
-class IssuePermissions(permissions.BasePermission):
-
+    """Permissions for action on project's collaborators """
     def has_permission(self, request, view):
         return request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
-        if view.action =='list':
-            return True
-        elif view.action == 'retrieve':
-            return True
-        elif view.action =='create':
-            return True
-        elif view.action in ['update', 'partial_update']:
-            return obj.author == request.user
-        elif view.action == 'destroy':
-            return obj.author == request.user
+        if request.method == 'GET':
+            return request.user in obj.contributors.all()
+        elif request.method in ['POST', 'DELETE']:
+            return request.user == obj.author
         else:
             return False
 
 
-class CommentPermissions(permissions.BasePermission):
-
+class IssueCommentPermissions(permissions.BasePermission):
+    """ Permissions for Issue and Comment """
     def has_permission(self, request, view):
         return request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
-        if view.action =='list':
-            return True
-        elif view.action == 'retrieve':
-            return True
-        elif view.action =='create':
-            return True
-        elif view.action in ['update', 'partial_update']:
-            return obj.author == request.user
-        elif view.action == 'destroy':
-            return obj.author == request.user
+        if request.method in ['GET', 'POST']:
+            return request.user in obj.contributors.all()
+        elif request.method in ['PUT', 'DELETE']:
+            return request.user == obj.author
         else:
             return False
