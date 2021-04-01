@@ -6,16 +6,15 @@ from .models import Projects, Issues, Comments
 class ProjectPermissions(permissions.BasePermission):
 
     def has_permission(self, request, view):
-        if 'pk' not in view.kwargs:
-            return True
-        else:
-            project = get_object_or_404(Projects, pk=view.kwargs['pk'])
-            if request.method == 'GET':
-                print('get')
-                return request.user in project.contributors.all()
-            elif request.method in ['PUT', 'DELETE']:
-                return request.user == project.author
+        return request.user.is_authenticated
 
+    def has_object_permission(self, request, view, obj):
+        if request.method == 'GET':
+            return request.user in obj.contributors.all()
+        elif request.method in ['PUT', 'DELETE']:
+            return request.user == obj.author
+        else:
+            return False
 
 class UserPermissions(permissions.BasePermission):
 

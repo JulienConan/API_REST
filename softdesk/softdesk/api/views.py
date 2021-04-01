@@ -19,6 +19,11 @@ class ProjectsViewSet(viewsets.ViewSet):
     """API Projects actions"""
     permission_classes = [IsAuthenticated, ProjectPermissions]
 
+    def get_object(self, pk):
+        obj = get_object_or_404(Projects, pk=pk)
+        self.check_object_permissions(self.request, obj)
+        return obj
+
     def list(self, request):
         """Project's user list"""
         queryset = Projects.objects.filter(contributors=request.user)
@@ -27,7 +32,7 @@ class ProjectsViewSet(viewsets.ViewSet):
 
     def retrieve(self, request, pk=None):
         """one particulary project"""
-        project = get_object_or_404(Projects, pk=pk)
+        project = self.get_object(pk)
         serializer = ProjectsSerializer(project)
         return Response(serializer.data)
 
@@ -42,7 +47,7 @@ class ProjectsViewSet(viewsets.ViewSet):
 
     def update(self, request, pk=None):
         """Update a project"""
-        project = get_object_or_404(Projects, pk=pk)
+        project = self.get_object(pk)
         serializer = ProjectsSerializer(project, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -50,7 +55,7 @@ class ProjectsViewSet(viewsets.ViewSet):
 
     def delete(self, request, pk=None):
         """Delete a project"""
-        project = get_object_or_404(Projects, pk=pk)
+        project = self.get_object(pk)
         project.delete()
         return Response(status=status.HTTP_204_NO_CONTENT, data={'message': 'bien effacé'})
 
