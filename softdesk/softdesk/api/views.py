@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
@@ -15,10 +16,17 @@ from .serializers import(
                         CommentsSerializer
                         )
 
+<<<<<<< Updated upstream
 class ProjectsViewSet(viewsets.ViewSet):
     """API Projects actions"""
-    permission_classes = [IsAuthenticated, ProjectPermissions]
+=======
+class ProjectsViewSet(viewsets.ModelViewSet):
 
+>>>>>>> Stashed changes
+    permission_classes = [IsAuthenticated, ProjectPermissions]
+    serializer_class = ProjectsSerializer
+
+<<<<<<< Updated upstream
     def get_object(self, pk):
         obj = get_object_or_404(Projects, pk=pk)
         self.check_object_permissions(self.request, obj)
@@ -35,6 +43,10 @@ class ProjectsViewSet(viewsets.ViewSet):
         project = self.get_object(pk)
         serializer = ProjectsSerializer(project)
         return Response(serializer.data)
+=======
+    def get_queryset(self):
+        return Projects.objects.filter(contributors=self.request.user)
+>>>>>>> Stashed changes
 
     def create(self, request):
         data = request.data.dict()
@@ -45,6 +57,7 @@ class ProjectsViewSet(viewsets.ViewSet):
         serializer_data.save()
         return Response(serializer_data.data, status=status.HTTP_201_CREATED)
 
+<<<<<<< Updated upstream
     def update(self, request, pk=None):
         """Update a project"""
         project = self.get_object(pk)
@@ -71,22 +84,46 @@ class UserProjectsViewSet(viewsets.ViewSet):
         project = self.project(projects_pk)
         if request.user not in project.contributors.all():
             return Response(data={'error': 'unauthorized'})
+=======
+
+class UserProjectsViewSet(viewsets.ModelViewSet):
+
+    permission_classes = [IsAuthenticated, UserPermissions]
+    serializer_class = UsersProjectSerializer
+
+    def get_queryset(self, pk):
+        project = Projects.objects.get(pk=pk)
+        self.check_object_permissions(self.request, project)
+        return project
+
+    def list(self, request, projects_pk=None):
+        project = self.get_queryset(projects_pk)
+>>>>>>> Stashed changes
         serializer = UsersProjectSerializer(project)
         return Response(serializer.data)
 
     def create(self, request, projects_pk=None):
+<<<<<<< Updated upstream
         project = self.project(projects_pk)
+=======
+        project = self.get_queryset(projects_pk)
+>>>>>>> Stashed changes
         project.contributors.add(int(request.data.dict()['contributors']))
         serializer = ProjectsSerializer(project)
         return Response(serializer.data)
 
     def destroy(self, request, projects_pk=None, pk=None):
+<<<<<<< Updated upstream
         project = self.project(projects_pk)
+=======
+        project = self.get_queryset(projects_pk)
+>>>>>>> Stashed changes
         project.contributors.remove(pk)
         serializer = ProjectsSerializer(project)
         return Response(serializer.data)
 
 
+<<<<<<< Updated upstream
 class IssuesProjectsViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
 
@@ -103,6 +140,19 @@ class IssuesProjectsViewSet(viewsets.ViewSet):
         serializer = IssuesSerializer(issues, many=True)
         return Response(serializer.data)
        
+=======
+class IssuesProjectsViewSet(viewsets.ModelViewSet):
+
+    permission_classes = [IsAuthenticated, IssueCommentPermissions]
+    serializer_class = IssuesSerializer
+
+    def get_queryset(self):
+        project_pk = self.kwargs['projects_pk']
+        project = get_object_or_404(Projects, pk=project_pk)
+        self.check_object_permissions(self.request, project)
+        return Issues.objects.filter(project=project_pk)
+
+>>>>>>> Stashed changes
     def create(self, request, projects_pk=None):
         data = request.data.dict()
         data['project'] = projects_pk
@@ -112,6 +162,7 @@ class IssuesProjectsViewSet(viewsets.ViewSet):
         serializer_data.is_valid(raise_exception=True)
         serializer_data.save()
         return Response(serializer_data.data, status=status.HTTP_201_CREATED)
+<<<<<<< Updated upstream
         
     def update(self, request, projects_pk=None, pk=None):
         """Update a Issue"""
@@ -141,14 +192,30 @@ class CommentsIssuesViewSet(viewsets.ViewSet):
         comment = get_object_or_404(Comments, pk=pk)
         serializer = CommentsSerializer(comment)
         return Response(serializer.data)
+=======
+
+
+class CommentsIssuesViewSet(viewsets.ModelViewSet):
+
+    permission_classes = [IsAuthenticated, IssueCommentPermissions]
+    serializer_class = CommentsSerializer
+
+    def get_queryset(self):
+        print(self.request.user)
+        project_pk = self.kwargs['projects_pk']
+        project = get_object_or_404(Projects, pk=project_pk)
+        self.check_object_permissions(self.request, project)
+        return Comments.objects.filter(issue=self.kwargs['issues_pk'])
+>>>>>>> Stashed changes
 
     def create(self, request, projects_pk=None, issues_pk=None):
         data = request.data.dict()
-        data['author_user_id'] = request.user.pk
-        data['issue_id'] = issues_pk
+        data['author'] = request.user.pk
+        data['issue'] = issues_pk
         serializer_data = CommentsSerializer(data=data)
         serializer_data.is_valid(raise_exception=True)
         serializer_data.save()
+<<<<<<< Updated upstream
         return Response(serializer_data.data, status=status.HTTP_201_CREATED)
 
     def update(self, request, projects_pk=None, issues_pk=None, pk=None):
@@ -162,3 +229,6 @@ class CommentsIssuesViewSet(viewsets.ViewSet):
         comment = get_object_or_404(queryset, pk=pk)
         comment.delete()
         return Response(status=204, data={'message': 'bien effacé'})
+=======
+        return Response(serializer_data.data, data={'message' : 'commentaire créé'})
+>>>>>>> Stashed changes
