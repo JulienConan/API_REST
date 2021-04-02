@@ -91,7 +91,6 @@ class CommentsIssuesViewSet(viewsets.ModelViewSet):
     serializer_class = CommentsSerializer
 
     def get_queryset(self):
-        print(self.request.user)
         project_pk = self.kwargs['projects_pk']
         project = get_object_or_404(Projects, pk=project_pk)
         self.check_object_permissions(self.request, project)
