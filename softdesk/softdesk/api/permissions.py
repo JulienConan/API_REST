@@ -34,7 +34,8 @@ class IssueCommentPermissions(permissions.BasePermission):
 
     def has_permission(self, request, view):
         if request.method in ['GET', 'POST', 'DELETE', 'PUT', 'PATCH']:
-            return request.user in Projects.objects.get(pk=view.kwargs['projects_pk']).contributors.all()
+            return request.user in Projects.objects.get(
+                pk=view.kwargs['projects_pk']).contributors.all()
 
     def has_object_permission(self, request, view, obj):
         if request.method in ['PUT', 'PATCH', 'DELETE']:
